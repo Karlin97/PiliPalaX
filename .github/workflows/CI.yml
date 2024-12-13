@@ -2,7 +2,9 @@ name: CI
 
 on:
   workflow_dispatch:
-  # push:
+  push:
+    tags:
+      - 'release*'  
   #   branches:
   #     - 'main'
   #   paths-ignore:

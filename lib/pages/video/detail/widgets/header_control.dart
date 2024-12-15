@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:PiliPalaX/pages/setting/widgets/switch_item.dart';
 import 'package:PiliPalaX/utils/id_utils.dart';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +14,6 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:PiliPalaX/http/user.dart';
 import 'package:PiliPalaX/models/video/play/quality.dart';
 import 'package:PiliPalaX/models/video/play/url.dart';
@@ -916,6 +917,7 @@ class _HeaderControlState extends State<HeaderControl> {
     double strokeWidth = widget.controller!.strokeWidth;
     // 字体粗细
     int fontWeight = widget.controller!.fontWeight;
+    bool massiveMode = widget.controller!.massiveMode;
 
     final DanmakuController danmakuController =
         widget.controller!.danmakuController!;
@@ -997,13 +999,6 @@ class _HeaderControlState extends State<HeaderControl> {
                               danmakuWeight;
                           widget.controller!.putDanmakuSettings();
                           setState(() {});
-                          // try {
-                          //   final DanmakuOption currentOption =
-                          //       danmakuController.option;
-                          //   final DanmakuOption updatedOption =
-                          //   currentOption.copyWith(strokeWidth: val);
-                          //   danmakuController.updateOption(updatedOption);
-                          // } catch (_) {}
                         },
                       ),
                     ),
@@ -1028,16 +1023,14 @@ class _HeaderControlState extends State<HeaderControl> {
                               widget.controller?.putDanmakuSettings();
                               setState(() {});
                               try {
-                                final DanmakuOption currentOption =
-                                    danmakuController.option;
-                                final DanmakuOption updatedOption =
-                                    currentOption.copyWith(
-                                  hideTop: blockTypes.contains(5),
-                                  hideBottom: blockTypes.contains(4),
-                                  hideScroll: blockTypes.contains(2),
-                                  // 添加或修改其他需要修改的选项属性
+                                danmakuController.updateOption(
+                                  danmakuController.option.copyWith(
+                                    hideTop: blockTypes.contains(5),
+                                    hideBottom: blockTypes.contains(4),
+                                    hideScroll: blockTypes.contains(2),
+                                    // 添加或修改其他需要修改的选项属性
+                                  ),
                                 );
-                                danmakuController.updateOption(updatedOption);
                               } catch (_) {}
                             },
                             text: i['label'],
@@ -1050,7 +1043,7 @@ class _HeaderControlState extends State<HeaderControl> {
                   ),
                   const Text('显示区域'),
                   Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 18),
+                    padding: const EdgeInsets.only(top: 12),
                     child: Row(
                       children: [
                         for (final Map<String, dynamic> i in showAreas) ...[
@@ -1061,11 +1054,10 @@ class _HeaderControlState extends State<HeaderControl> {
                               widget.controller?.putDanmakuSettings();
                               setState(() {});
                               try {
-                                final DanmakuOption currentOption =
-                                    danmakuController.option;
-                                final DanmakuOption updatedOption =
-                                    currentOption.copyWith(area: i['value']);
-                                danmakuController.updateOption(updatedOption);
+                                danmakuController.updateOption(
+                                  danmakuController.option
+                                      .copyWith(area: i['value']),
+                                );
                               } catch (_) {}
                             },
                             text: i['label'],
@@ -1075,6 +1067,23 @@ class _HeaderControlState extends State<HeaderControl> {
                         ]
                       ],
                     ),
+                  ),
+                  SetSwitchItem(
+                    title: '海量弹幕',
+                    contentPadding: EdgeInsets.all(0),
+                    titleStyle: TextStyle(fontSize: 14),
+                    defaultVal: massiveMode,
+                    setKey: SettingBoxKey.danmakuMassiveMode,
+                    onChanged: (value) {
+                      massiveMode = value;
+                      widget.controller!.massiveMode = value;
+                      setState(() {});
+                      try {
+                        danmakuController.updateOption(
+                          danmakuController.option.copyWith(massiveMode: value),
+                        );
+                      } catch (_) {}
+                    },
                   ),
                   Text('不透明度 ${opacityVal * 100}%'),
                   Padding(
@@ -1105,11 +1114,9 @@ class _HeaderControlState extends State<HeaderControl> {
                           widget.controller?.putDanmakuSettings();
                           setState(() {});
                           try {
-                            final DanmakuOption currentOption =
-                                danmakuController.option;
-                            final DanmakuOption updatedOption =
-                                currentOption.copyWith(opacity: val);
-                            danmakuController.updateOption(updatedOption);
+                            danmakuController.updateOption(
+                              danmakuController.option.copyWith(opacity: val),
+                            );
                           } catch (_) {}
                         },
                       ),
@@ -1144,11 +1151,10 @@ class _HeaderControlState extends State<HeaderControl> {
                           widget.controller?.putDanmakuSettings();
                           setState(() {});
                           try {
-                            final DanmakuOption currentOption =
-                                danmakuController.option;
-                            final DanmakuOption updatedOption =
-                                currentOption.copyWith(fontWeight: fontWeight);
-                            danmakuController.updateOption(updatedOption);
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(fontWeight: fontWeight),
+                            );
                           } catch (_) {}
                         },
                       ),
@@ -1183,11 +1189,10 @@ class _HeaderControlState extends State<HeaderControl> {
                           widget.controller?.putDanmakuSettings();
                           setState(() {});
                           try {
-                            final DanmakuOption currentOption =
-                                danmakuController.option;
-                            final DanmakuOption updatedOption =
-                                currentOption.copyWith(strokeWidth: val);
-                            danmakuController.updateOption(updatedOption);
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(strokeWidth: val),
+                            );
                           } catch (_) {}
                         },
                       ),
@@ -1223,13 +1228,11 @@ class _HeaderControlState extends State<HeaderControl> {
                           setState(() {});
                           if (widget.controller?.isFullScreen.value == false) {
                             try {
-                              final DanmakuOption currentOption =
-                                  danmakuController.option;
-                              final DanmakuOption updatedOption =
-                                  currentOption.copyWith(
-                                fontSize: (15 * fontSizeVal).toDouble(),
+                              danmakuController.updateOption(
+                                danmakuController.option.copyWith(
+                                  fontSize: (15 * fontSizeVal).toDouble(),
+                                ),
                               );
-                              danmakuController.updateOption(updatedOption);
                             } catch (_) {}
                           }
                         },
@@ -1266,15 +1269,54 @@ class _HeaderControlState extends State<HeaderControl> {
                           setState(() {});
                           if (widget.controller?.isFullScreen.value == true) {
                             try {
-                              final DanmakuOption currentOption =
-                                  danmakuController.option;
-                              final DanmakuOption updatedOption =
-                                  currentOption.copyWith(
-                                fontSize: (15 * fontSizeFSVal).toDouble(),
+                              danmakuController.updateOption(
+                                danmakuController.option.copyWith(
+                                  fontSize: (15 * fontSizeFSVal).toDouble(),
+                                ),
                               );
-                              danmakuController.updateOption(updatedOption);
                             } catch (_) {}
                           }
+                        },
+                      ),
+                    ),
+                  ),
+                  Text('弹幕时长 $danmakuDurationVal 秒'),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 0,
+                      bottom: 6,
+                      left: 10,
+                      right: 10,
+                    ),
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        trackShape: MSliderTrackShape(),
+                        thumbColor: Theme.of(context).colorScheme.primary,
+                        activeTrackColor: Theme.of(context).colorScheme.primary,
+                        trackHeight: 10,
+                        thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6.0),
+                      ),
+                      child: Slider(
+                        min: 1,
+                        max: 4,
+                        value: pow(danmakuDurationVal, 1 / 4) as double,
+                        divisions: 60,
+                        label: danmakuDurationVal.toString(),
+                        onChanged: (double val) {
+                          danmakuDurationVal =
+                              (pow(val, 4) as double).toPrecision(2);
+                          widget.controller!.danmakuDurationVal =
+                              danmakuDurationVal;
+                          widget.controller?.putDanmakuSettings();
+                          setState(() {});
+                          try {
+                            danmakuController.updateOption(
+                              danmakuController.option.copyWith(
+                                  duration: danmakuDurationVal ~/
+                                      widget.controller!.playbackSpeed),
+                            );
+                          } catch (_) {}
                         },
                       ),
                     ),
@@ -1345,47 +1387,6 @@ class _HeaderControlState extends State<HeaderControl> {
                               subtitleFontScaleFS;
                           widget.controller?.putDanmakuSettings();
                           setState(() {});
-                        },
-                      ),
-                    ),
-                  ),
-                  Text('弹幕时长 $danmakuDurationVal 秒'),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 0,
-                      bottom: 6,
-                      left: 10,
-                      right: 10,
-                    ),
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        trackShape: MSliderTrackShape(),
-                        thumbColor: Theme.of(context).colorScheme.primary,
-                        activeTrackColor: Theme.of(context).colorScheme.primary,
-                        trackHeight: 10,
-                        thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 6.0),
-                      ),
-                      child: Slider(
-                        min: 1,
-                        max: 4,
-                        value: pow(danmakuDurationVal, 1 / 4) as double,
-                        divisions: 60,
-                        label: danmakuDurationVal.toString(),
-                        onChanged: (double val) {
-                          danmakuDurationVal =
-                              (pow(val, 4) as double).toPrecision(2);
-                          widget.controller!.danmakuDurationVal =
-                              danmakuDurationVal;
-                          widget.controller?.putDanmakuSettings();
-                          setState(() {});
-                          try {
-                            final DanmakuOption updatedOption =
-                                danmakuController.option.copyWith(
-                                    duration: danmakuDurationVal /
-                                        widget.controller!.playbackSpeed);
-                            danmakuController.updateOption(updatedOption);
-                          } catch (_) {}
                         },
                       ),
                     ),
